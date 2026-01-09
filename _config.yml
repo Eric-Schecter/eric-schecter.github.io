@@ -1,0 +1,4 @@
+deploy:
+  type: git
+  repository: git@github.com:Eric-Schecter/eric-schecter.github.io.git
+  branch: main
