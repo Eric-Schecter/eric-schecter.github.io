@@ -10,8 +10,8 @@
   {{ $bg := partial "func/getImage" . }}
   <article class="article mb-2">
     {{- $link := $value.Permalink -}}
-    {{- if $value.Params.externalLink -}}
-      {{- $link = $value.Params.externalLink -}}
+    {{- if $value.Params.link -}}
+      {{- $link = $value.Params.link -}}
     {{- end -}}
     <a href={{ $link }} {{ if eq $index 0 }} class=grid-reverse {{ end }}>
       <div class=article_thumb style='background-image: url({{ $bg }})'></div>
@@ -28,9 +28,4 @@
     {{- if and (eq $index (add $size -1)) (gt $size 1) }}</div>{{ end }}
   {{- end }}
 </div>
-<a href='{{ absURL (printf "%s/%s" $blog_dir "") }}' class=post_nav><span class=post_next>{{ T "archive_text" }}
-    <svg class="icon icon_scale">
-      <use xlink:href="#double-arrow"></use>
-    </svg>
-  </span></a>
 {{ end }}
