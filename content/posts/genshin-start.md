@@ -8,4 +8,5 @@ link = "https://eric-schecter.github.io/genshin-start"
 ---
 
 Genshin Start Demo
+
 ------------------
