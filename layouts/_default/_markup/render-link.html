@@ -1,0 +1,23 @@
+{{- $dest := .Destination -}}
+{{- $hint := .Title | default "" -}}
+{{- $isExternal := or
+  (strings.HasPrefix $dest "http://")
+  (strings.HasPrefix $dest "https://")
+  (strings.HasPrefix $dest "//")
+-}}
+
+{{ $target := "_blank" }}
+{{ $realTitle := "" }}
+
+{{ if eq $hint "_self" }}
+  {{ $target = "" }}
+{{ else }}
+  {{ $realTitle = $hint }}
+{{ end }}
+
+<a href="{{ $dest | safeURL }}"
+{{ with $realTitle }}title="{{ . }}"{{ end }}
+{{ if $target }} target="{{ $target }}" rel="noopener noreferrer"{{ end }}
+>
+{{ .Text | safeHTML }}
+</a>
