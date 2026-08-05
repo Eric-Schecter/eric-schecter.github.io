@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{{- $mode := partialCached "func/getMode" . }}
+<html lang="{{ .Lang }}" {{ if $mode }} data-mode="{{ $mode }}"{{ end }}>
+  {{ partial "head" . }}
+  <body>
+    {{ partialCached "nav" . }}
+    <main id="pjax-container">
+      {{ block "main" . }}{{ end }}
+    </main>
+    {{ partialCached "footer" . }}
+    {{ partialCached "sprites" . }}
+
+    <script src="/js/simple-pjax.min.js"></script>
+    <script>
+      var pjax = new Pjax({
+        selectors: ['#pjax-container'],
+      });
+    </script>
+  </body>
+</html>
