@@ -21,6 +21,8 @@
   let source = null;
   let audioBuffer = null;
   let isLoading = false;
+  let pauseTime = 0;
+  let startTime = 0;
 
   const playBtn = document.getElementById("bgmPlayBtn");
   const playState = document.getElementById("playState");
@@ -30,6 +32,23 @@
     const res = await fetch(url);
     const arrBuf = await res.arrayBuffer();
     return await audioCtx.decodeAudioData(arrBuf);
+  }
+
+  function getCurrentTime() {
+    if (!source || !audioCtx) return pauseTime;
+    
+    try {
+      const currentTime = audioCtx.currentTime - startTime + pauseTime;
+      
+      if (currentTime >= LOOP_END) {
+        const loopLength = LOOP_DURATION;
+        const offset = (currentTime - LOOP_START) % loopLength;
+        return LOOP_START + offset;
+      }
+      return currentTime;
+    } catch(e) {
+      return pauseTime;
+    }
   }
 
   async function playBgm(){
@@ -57,8 +76,9 @@
     source.loopEnd = LOOP_END;
 
     source.connect(audioCtx.destination);
-    source.start(0); 
+    source.start(0, pauseTime); 
 
+    startTime = audioCtx.currentTime;
     isLoading = false;
 
     source.onended = ()=>{
@@ -68,6 +88,8 @@
 
   function stopBgm(){
     if(source){
+    pauseTime = getCurrentTime();
+
       try{ source.stop(); }catch(e){}
       source = null;
     }
