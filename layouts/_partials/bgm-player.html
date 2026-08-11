@@ -20,6 +20,7 @@
   let audioCtx = null;
   let source = null;
   let audioBuffer = null;
+  let isLoading = false;
 
   const playBtn = document.getElementById("bgmPlayBtn");
   const playState = document.getElementById("playState");
@@ -32,6 +33,10 @@
   }
 
   async function playBgm(){
+    if(isLoading) return;
+
+    isLoading = true;
+
     if(!audioCtx){
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -53,6 +58,8 @@
 
     source.connect(audioCtx.destination);
     source.start(0); 
+
+    isLoading = false;
 
     source.onended = ()=>{
       source = null;

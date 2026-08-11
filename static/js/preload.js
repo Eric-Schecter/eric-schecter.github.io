@@ -1,7 +1,14 @@
 // 超短版：10 行核心逻辑
 (function () {
   const resources = [
+    // audios
     '/assets/audios/bgm.mp3',
+    // images
+    'images/genshin-start.png',
+    'images/ocean-2.png',
+    'images/step-viewer.jpg',
+    'images/uncharted-waters-2-2.jpg',
+    'images/viewer.png',
   ];
 
   function loadAll(callback) {
