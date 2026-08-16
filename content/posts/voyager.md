@@ -8,6 +8,8 @@ image = "/images/voyager.png"
 
 Built with threejs
 
+![image](/images/voyager.gif)
+
 [Online Demo](https://eric-schecter.github.io/voyager)
 
 ---
