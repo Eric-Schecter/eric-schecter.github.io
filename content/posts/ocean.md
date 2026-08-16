@@ -8,8 +8,9 @@ image = "/images/ocean-2.png"
 
 Developed with Unreal Engine 5
 
-1. Press Space to Fire  
-2. Press P to Pause Game  
+1. Press Space to Fire
+2. Press WASD to move
+3. Press P to Pause Game
 
 [Demo](https://mega.nz/file/92Y2jbzJ#hYQMvTvEAuykCjc5bnMHWbmuRcB3SD5LgtuselQPsUg)
 
