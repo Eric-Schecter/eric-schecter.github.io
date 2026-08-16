@@ -13,3 +13,7 @@ Built with threejs
 [Online Demo](https://eric-schecter.github.io/voyager)
 
 ---
+
+#### Reference
+
+- [Ship Model](https://sketchfab.com/3d-models/russian-archipelago-frigate-svjatoi-nikolai-2e0c2c37a55f48bba314c894ca5e5f0b)
