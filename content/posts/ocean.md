@@ -6,17 +6,18 @@ image = "/images/ocean-2.png"
 
 ---
 
+## Boat Shooter Game Demo  
 Developed with Unreal Engine 5
 
 1. Press Space to Fire
 2. Press WASD to move
 3. Press P to Pause Game
 
-[Demo](https://mega.nz/file/92Y2jbzJ#hYQMvTvEAuykCjc5bnMHWbmuRcB3SD5LgtuselQPsUg)
-
 {{< youtube qXyfv49fKoM >}}
 
-#### Reference
+[Demo](https://mega.nz/file/92Y2jbzJ#hYQMvTvEAuykCjc5bnMHWbmuRcB3SD5LgtuselQPsUg)
+
+## Reference
 
 - [Wake](https://www.youtube.com/watch?v=VSwVwIYEypY)
 - [WaterFX](https://github.com/Unity-Technologies/BoatAttack)

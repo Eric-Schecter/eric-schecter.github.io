@@ -6,7 +6,7 @@ image = "/images/genshin-start.png"
 
 ---
 
-Genshin Start Demo
+## Genshin Start Demo
 
 A repo aims to implement the effects from the project with WebGPU for self learing.
 All the implemention details follow the source code from [repo](https://github.com/gamemcu/www-genshin).

@@ -6,7 +6,7 @@ image = "/images/viewer.png"
 
 ---
 
-PBR Viewer with WebGPU
+## PBR Viewer with WebGPU
 
 [Online Demo](https://eric-schecter.github.io/NovaWeb)
 
