@@ -1,0 +1,4 @@
+{{ if ne site.Params.eileen.enabled false }}
+<eileen-companion></eileen-companion>
+<script type="module" src="{{ "eileen/widget.js" | relURL }}"></script>
+{{ end }}
