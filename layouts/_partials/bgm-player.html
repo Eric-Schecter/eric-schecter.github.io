@@ -12,101 +12,12 @@
 
 <script>
 (()=>{
-  const BGM_URL = "/assets/audios/bgm.mp3";
-  const LOOP_START = 63.567;   
-  const LOOP_DURATION = 64.793;
-  const LOOP_END = LOOP_START + LOOP_DURATION;
-
-  let audioCtx = null;
-  let source = null;
-  let audioBuffer = null;
-  let isLoading = false;
-  let pauseTime = 0;
-  let startTime = 0;
-
-  const playBtn = document.getElementById("bgmPlayBtn");
-  const playState = document.getElementById("playState");
-  const stopState = document.getElementById("stopState");
-
-  async function loadBuffer(url){
-    const res = await fetch(url);
-    const arrBuf = await res.arrayBuffer();
-    return await audioCtx.decodeAudioData(arrBuf);
-  }
-
-  function getCurrentTime() {
-    if (!source || !audioCtx) return pauseTime;
-    
-    try {
-      const currentTime = audioCtx.currentTime - startTime + pauseTime;
-      
-      if (currentTime >= LOOP_END) {
-        const loopLength = LOOP_DURATION;
-        const offset = (currentTime - LOOP_START) % loopLength;
-        return LOOP_START + offset;
-      }
-      return currentTime;
-    } catch(e) {
-      return pauseTime;
-    }
-  }
-
-  async function playBgm(){
-    if(isLoading) return;
-
-    isLoading = true;
-
-    if(!audioCtx){
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    if(source){
-      try{ source.stop(); }catch(e){}
-      source = null;
-    }
-
-    if(!audioBuffer){
-      audioBuffer = await loadBuffer(BGM_URL);
-    }
-
-    source = audioCtx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.loop = true;
-    source.loopStart = LOOP_START;
-    source.loopEnd = LOOP_END;
-
-    source.connect(audioCtx.destination);
-    source.start(0, pauseTime); 
-
-    startTime = audioCtx.currentTime;
-    isLoading = false;
-
-    source.onended = ()=>{
-      source = null;
-    };
-  }
-
-  function stopBgm(){
-    if(source){
-    pauseTime = getCurrentTime();
-
-      try{ source.stop(); }catch(e){}
-      source = null;
-    }
-
-  }
-
-  playBtn.addEventListener("click", ()=>{
-    if(source){
-      playState.style.display = "none";
-      stopState.style.display = "inline";
-      stopBgm();
-    }else{
-      playState.style.display = "inline";
-      stopState.style.display = "none";
-      playBgm();
-    }
-  });
-
+ const btn=document.getElementById('bgmPlayBtn');let ctx,buffer,source,loading=null,version=0,offset=0,started=0;
+ const ui=()=>{document.getElementById('playState').style.display=source?'inline':'none';document.getElementById('stopState').style.display=source?'none':'inline';};
+ const stop=()=>{version++;if(source){offset=(offset+ctx.currentTime-started)%128.36;source.onended=null;source.stop();source=null;}ui();};
+ const play=async()=>{if(source)return;const request=++version;ctx??=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();if(!buffer){loading??=fetch('/assets/audios/bgm.mp3').then(r=>{if(!r.ok)throw Error('Audio unavailable');return r.arrayBuffer();}).then(b=>ctx.decodeAudioData(b)).finally(()=>loading=null);buffer=await loading;}if(request!==version)return;if(source)return;const current=ctx.createBufferSource();current.buffer=buffer;current.loop=true;current.loopStart=63.567;current.loopEnd=128.36;current.connect(ctx.destination);current.start(0,offset);source=current;started=ctx.currentTime;current.onended=()=>{if(source===current){source=null;ui();}};ui();};
+ window.eileenMusic={play,stop,get playing(){return !!source;}};
+ btn.addEventListener('click',()=>{if(source)stop();else play().catch(e=>{ui();console.error('Music playback failed',e);});});ui();
 })();
+
 </script>

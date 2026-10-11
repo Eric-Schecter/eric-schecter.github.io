@@ -52,8 +52,87 @@ const localReplies={
 const replyCounts={};
 function reply(text,intent=classifyMessage(text)){const options=localReplies[intent];const n=replyCounts[intent]||0;replyCounts[intent]=n+1;return options[n%options.length];}
 function messageMotion(text,intent=classifyMessage(text)){return ['compliment','thanks','praiseVisitor'].includes(intent)?'happy':['greeting','goodbye'].includes(intent)?'wave':['advice','projects','contact','unknown'].includes(intent)?'thinking':'idle';}
-async function send(text){text=text.trim();if(!text||responding)return;const intent=classifyMessage(text),motion=messageMotion(text,intent);responding=true;if(motion==='thinking'){pet.classList.add('thinking');controller.motion?.think();}else controller.motion?.play(motion);root.querySelectorAll('form button').forEach(b=>b.disabled=true);latest.textContent=motion==='happy'?'这话我听见啦。':motion==='wave'?'嗨，欢迎靠岸。':motion==='idle'?'嗯，我听着。':'稍等，我理一理这笔账…';placeCompanion();append(text,true);say(latest.textContent);const pending=append('…');await new Promise(r=>setTimeout(r,750));pending.textContent=reply(text,intent);latest.textContent=pending.textContent;placeCompanion();messages.scrollTop=messages.scrollHeight;say('这是我的看法，你也可以有不同的打算。');responding=false;pet.classList.remove('thinking');if(controller.motion){if(motion==='thinking')controller.motion.finishThinking('idle');}else react(motion==='happy'?'happy':motion==='wave'?'greet':'nod');root.querySelectorAll('form button').forEach(b=>b.disabled=false);}
+async function send(text){text=text.trim();if(!text||responding)return;if(handleSiteControl(text)||handleDestination(text)||recommendProject(text)){append(text,true);return;}const intent=classifyMessage(text),motion=messageMotion(text,intent);responding=true;if(motion==='thinking'){pet.classList.add('thinking');controller.motion?.think();}else controller.motion?.play(motion);root.querySelectorAll('form button').forEach(b=>b.disabled=true);latest.textContent=motion==='happy'?'这话我听见啦。':motion==='wave'?'嗨，欢迎靠岸。':motion==='idle'?'嗯，我听着。':'稍等，我理一理这笔账…';placeCompanion();append(text,true);say(latest.textContent);const pending=append('…');await new Promise(r=>setTimeout(r,750));pending.textContent=reply(text,intent);latest.textContent=pending.textContent;placeCompanion();messages.scrollTop=messages.scrollHeight;say('这是我的看法，你也可以有不同的打算。');responding=false;pet.classList.remove('thinking');if(controller.motion){if(motion==='thinking')controller.motion.finishThinking('idle');}else react(motion==='happy'?'happy':motion==='wave'?'greet':'nod');root.querySelectorAll('form button').forEach(b=>b.disabled=false);}
 root.querySelector('#chat').onsubmit=e=>{e.preventDefault();const input=e.currentTarget.querySelector('input');if(!responding){send(input.value);input.value='';}};root.querySelector('#quick-chat').onsubmit=root.querySelector('#chat').onsubmit;root.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>send(b.dataset.say));window.addEventListener('resize',()=>{placeCompanion();if(pet.style.left){pet.style.left=Math.max(0,Math.min(innerWidth-pet.offsetWidth,parseFloat(pet.style.left)))+'px';pet.style.top=Math.max(0,Math.min(innerHeight-pet.offsetHeight,parseFloat(pet.style.top)))+'px';}});timer=setTimeout(()=>bubble.classList.add('hidden'),6500);
+
+const projectIndex=JSON.parse(host.querySelector('[data-eileen-index]')?.textContent||'[]');
+let lastProject=null,navigationTimer;
+function navigateProject(item){const url=new URL(item.url,location.href);if(url.origin!==location.origin)return;if(window.pjax?.loadUrl)window.pjax.loadUrl(url.href);else location.assign(url.href);}
+function recommendProject(text){
+ clearTimeout(navigationTimer);text=text.normalize('NFKC').trim();
+ const previewOnly=/先.*(?:推荐|介绍|说说)|只.*(?:推荐|介绍)|不(?:要|用|想|必).*?(?:打开|跳转)|别.*(?:打开|跳转)/.test(text);
+ if(/不(?:要|用|想).*逛|别.*逛/.test(text))return false;
+ const follow=/^(?:好的?[,， ]*)?(?:打开它?|带我去吧?|去看看吧?|就这个吧?|走吧|这个不错[,， ]*去看看)[!！。\s]*$/.test(text);
+ if(follow&&lastProject&&!previewOnly){navigateProject(lastProject);latest.textContent='好，带你去看看 '+lastProject.title+'。';return true;}
+ const newest=/最新|最近.*(?:做|作品|项目|更新)|新(?:作品|项目|东西)|刚.*(?:做|发布|更新)/.test(text);
+ const wander=/逛|随便.*看|有什么好玩|带路|随机|随意.*看|有啥好玩/.test(text);
+ const topic=/(?:想看|有没有|看看|看一下|找|推荐).*(?:海洋|海面|海水|游戏|渲染|模型|ocean|viewer)/i.test(text);
+ if(!newest&&!wander&&!topic&&!follow&&!/推荐|最好|精选|打开|带我去/.test(text))return false;
+ const autoNavigate=!previewOnly&&(newest||wander||topic||/打开|跳转|带我去|去看看/.test(text));
+ const items=[...projectIndex].sort((a,b)=>b.date.localeCompare(a.date));
+ let item,description;
+ if(newest){item=items[0];description='最新靠岸的是';}
+ else if(/最好|精选|最棒/.test(text)){const selected=items.filter(p=>p.featured);item=selected[0];description='我会先推荐这份精选';if(!item){latest.textContent='“最好”我可不想随便盖章。Eric 还没标记精选项目，要不要先看看最新的？';const b=document.createElement('button');b.textContent='看看最新项目';b.onclick=()=>recommendProject('推荐最新项目');latest.append(document.createElement('br'),b);placeCompanion();return true;}}
+ else if(wander){const pool=items.filter(p=>p.url!==location.pathname&&p.url!==lastProject?.url);item=(pool.length?pool:items)[Math.floor(Math.random()*(pool.length||items.length))];description='这次带你看看';}
+ else{
+ const query=text.toLowerCase().replace(/请|帮我|给我|推荐|打开|带我去|看看|这里|一个|相关|的|项目|文章/g,'').replace(/[？?！!。，,\s]/g,'');
+ const aliases=[[/海洋|海面|海水/,'ocean 海洋 海面'],[/游戏/,'game 游戏'],[/渲染/,'render shader 渲染'],[/模型/,'model viewer 模型']];
+ const terms=[query,...aliases.filter(([re])=>re.test(query)).flatMap(([,v])=>v.split(' '))].filter(Boolean);
+ const ranked=items.map(p=>({item:p,score:terms.reduce((n,t)=>n+(p.title.toLowerCase().includes(t)?5:0)+((p.tags||[]).join(' ').toLowerCase().includes(t)?3:0)+(p.summary.toLowerCase().includes(t)?1:0),0)})).sort((a,b)=>b.score-a.score);
+ item=ranked[0]?.score?ranked[0].item:null;description='按你说的内容，我会选';
+ }
+ if(!item){latest.textContent='这趟暂时没找到匹配的项目。可以说“带我逛逛”或“推荐最新项目”。';placeCompanion();return true;}
+ lastProject=item;controller.motion?.play('idle');
+ const destination=item.title;
+ const guideLine=newest?'最近的新作品是 '+destination+'。走，我带你去看看。':wander?'那就由我挑一站——'+destination+'。跟我来，看看合不合你的口味。':'你想看的内容，'+destination+' 里有。走，我们过去看看。';
+ if(autoNavigate){
+  latest.textContent=guideLine;placeCompanion();
+  navigationTimer=setTimeout(()=>navigateProject(item),650);
+  return true;
+ }
+ latest.textContent=description+' '+destination+'。你想去的时候，我来带路。';
+ const link=document.createElement('a');link.href=item.url;link.textContent='带我去看看 →';link.style.cssText='display:block;color:inherit;margin-top:8px;text-decoration:underline';link.onclick=e=>{if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;e.preventDefault();navigateProject(item);};latest.append(link);placeCompanion();
+ return true;
+}
+
+function handleSiteControl(text){
+ if(/(?:不要|别|不用)(?:播放|放|开)(?:音乐|歌)/.test(text))text='停止音乐';
+ const music=/(?:音乐|背景音|bgm|歌)/i.test(text),stop=/(?:停止|暂停|关掉|关闭|别放|安静)/.test(text),play=/(?:播放|放点|放个|来点|来首|打开|开启|听)/.test(text);
+ if(music&&(stop||play)){
+  clearTimeout(navigationTimer);controller.motion?.play('idle');
+  if(!window.eileenMusic){latest.textContent='音乐控件还没准备好，稍等再试一下。';return true;}
+  if(stop){window.eileenMusic.stop();latest.textContent='好，音乐停下了。安静听一会儿风声也不错。';}
+  else{latest.textContent='好，给这趟航程添点音乐。';window.eileenMusic.play().then(()=>{latest.textContent='音乐响起来了。你慢慢逛，我陪着。';}).catch(()=>{latest.textContent='音乐暂时没能播放，请点一下页面上的音乐按钮再试试。';});}
+  placeCompanion();return true;
+ }
+ const dark=/(?:夜间|夜晚|晚上|深色|暗色|黑夜)/.test(text),light=/(?:白天|日间|浅色|亮色)/.test(text),toggle=/(?:切换|换|开启|打开|改成|调成|变成)/.test(text);
+ if((dark||light)&&toggle||/切换(?:日夜|明暗)|换个主题/.test(text)){
+  clearTimeout(navigationTimer);const isDark=dark?true:light?false:document.documentElement.dataset.mode!=='dim';
+  document.documentElement.dataset.mode=isDark?'dim':'lit';try{localStorage.setItem('colorMode',isDark?'dim':'lit');}catch{}
+  latest.textContent=isDark?'夜色换好了。光线柔和些，慢慢看。':'换回白天啦。视野敞亮，适合继续逛逛。';controller.motion?.play('idle');placeCompanion();return true;
+ }
+ return false;
+}
+
+function handleDestination(text){
+ const t=text.normalize('NFKC').trim().toLowerCase();
+ if(/不要|不用|别|不想/.test(t))return false;
+ const rules=[
+  {test:/主页|首页|主站|回家/,selector:'.nav-brand',name:'主页',line:'好，回到主页。新的航程也可以从这里开始。',internal:true},
+  {test:/github|代码仓库|源码仓库/,selector:'header a[href*="github.com/"]',name:'GitHub',line:'走，去 Eric 的 GitHub 看看，作品背后的代码都在那边。'},
+  {test:/game[\s-]*lab|游戏实验室|游戏页面|玩游戏/,selector:'header a[href*="/game-lab/"]',name:'游戏实验室',line:'想玩点什么？走，带你去游戏实验室。'},
+  {test:/audio[\s-]*lab|音频实验室|音频页面|音频工具/,selector:'header a[href*="/audio-lab/"]',name:'音频实验室',line:'好，去音频实验室。这一站，交给耳朵来挑货。'},
+  {test:/story[\s-]*lab|故事实验室|故事页面|看故事|读故事/,selector:'header a[href*="/story-lab/"]',name:'故事实验室',line:'走，去故事实验室。那边还有些航程，等你慢慢读。'}
+ ];
+ const rule=rules.find(r=>r.test.test(t));if(!rule)return false;
+ // Destination names alone are shortcuts; ordinary questions about them stay in chat.
+ if(/是什么|介绍|怎么做|如何|为什么|先.*推荐|只.*介绍/.test(t)&&!/打开|带我去|进入|跳转/.test(t))return false;
+ const anchor=document.querySelector(rule.selector);if(!anchor)return false;
+ const url=new URL(anchor.href,location.href);if(!['http:','https:'].includes(url.protocol))return false;
+ clearTimeout(navigationTimer);controller.motion?.play('idle');latest.textContent=rule.line;placeCompanion();
+ navigationTimer=setTimeout(()=>{if(rule.internal&&url.origin===location.origin&&window.pjax?.loadUrl)window.pjax.loadUrl(url.href);else location.assign(url.href);},650);
+ return true;
+}
 
 const status=controller.status={state:'loading',engine:'rev2d'};
 (async()=>{

@@ -14,3 +14,5 @@ Shadow DOM 隔离样式与查询；PJAX 切换保留角色、位置和当前会�
 仓库已包含运行库，Hugo/CI 不需要该外部工具。
 第三方许可：static/eileen/REV2D-LICENSE.txt。
 当前聊天为本地规则，不调用 AI，不发送访客留言；对话只存在于当前浏览器页面内存。
+
+内容推荐：Hugo 自动将 posts 索引嵌入组件。最新按 date 排序；精选由文章 front matter 的 featured = true 标记。随机推荐尽量避开当前文章和上次推荐。关键词匹配标题、tags 与摘要。推荐显示按钮；明确“打开/跳转”时自动 PJAX 导航，“带我去”可跟进上一推荐。
