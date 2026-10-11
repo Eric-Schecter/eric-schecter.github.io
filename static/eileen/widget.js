@@ -52,8 +52,97 @@ const localReplies={
 const replyCounts={};
 function reply(text,intent=classifyMessage(text)){const options=localReplies[intent];const n=replyCounts[intent]||0;replyCounts[intent]=n+1;return options[n%options.length];}
 function messageMotion(text,intent=classifyMessage(text)){return ['compliment','thanks','praiseVisitor'].includes(intent)?'happy':['greeting','goodbye'].includes(intent)?'wave':['advice','projects','contact','unknown'].includes(intent)?'thinking':'idle';}
-async function send(text){text=text.trim();if(!text||responding)return;if(handleSiteControl(text)||handleDestination(text)||recommendProject(text)){append(text,true);return;}const intent=classifyMessage(text),motion=messageMotion(text,intent);responding=true;if(motion==='thinking'){pet.classList.add('thinking');controller.motion?.think();}else controller.motion?.play(motion);root.querySelectorAll('form button').forEach(b=>b.disabled=true);latest.textContent=motion==='happy'?'这话我听见啦。':motion==='wave'?'嗨，欢迎靠岸。':motion==='idle'?'嗯，我听着。':'稍等，我理一理这笔账…';placeCompanion();append(text,true);say(latest.textContent);const pending=append('…');await new Promise(r=>setTimeout(r,750));pending.textContent=reply(text,intent);latest.textContent=pending.textContent;placeCompanion();messages.scrollTop=messages.scrollHeight;say('这是我的看法，你也可以有不同的打算。');responding=false;pet.classList.remove('thinking');if(controller.motion){if(motion==='thinking')controller.motion.finishThinking('idle');}else react(motion==='happy'?'happy':motion==='wave'?'greet':'nod');root.querySelectorAll('form button').forEach(b=>b.disabled=false);}
+const chatHistory=[];
+const aiEndpoint='https://eileen-api.hhh147464939.workers.dev/chat';
+async function askEileen(text){
+  const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),20000);
+  try{
+    const response=await fetch(aiEndpoint,{method:'POST',headers:{'Content-Type':'application/json',...(typeof ownerHeaders==='function'?ownerHeaders():{})},body:JSON.stringify({message:text,history:chatHistory}),signal:abort.signal});
+    if(!response.ok){let detail;try{detail=await response.json();}catch{}const error=new Error(detail?.error||'http_error');error.status=response.status;throw error;}
+    const result=await response.json();
+    if(typeof result.reply!=='string'||!result.reply.trim())throw new Error('Invalid reply');
+    return {reply:result.reply.trim().slice(0,1200),emotion:['idle','happy','sad','thinking','wave'].includes(result.emotion)?result.emotion:'idle',offerMessage:result.offerMessage===true};
+  }finally{clearTimeout(timeout);}
+}
+async function send(text){
+  text=text.trim();if(!text||responding)return;if(handleMessageCommand(text)){append(text,true);return;}if(isExplicitSiteCommand(text)&&(handleSiteControl(text)||handleDestination(text)||recommendProject(text))){append(text,true);return;}
+  if(text.length>1000){latest.textContent='这段话有点长，分成几段告诉我吧，每次一千字以内。';placeCompanion();return;}
+  const intent=classifyMessage(text),motion=messageMotion(text,intent);
+  responding=true;
+  if(motion==='thinking'){pet.classList.add('thinking');controller.motion?.think();}else controller.motion?.play(motion);
+  root.querySelectorAll('form button').forEach(b=>b.disabled=true);
+  latest.textContent=motion==='happy'?'这话我听见啦。':motion==='wave'?'嗨，欢迎靠岸。':'稍等，我理一理这笔账…';
+  placeCompanion();append(text,true);say(latest.textContent);
+  const pending=append('…');let answer,emotion=motion,online=false,canLeaveMessage=false;
+  try{const result=await askEileen(text);answer=result.reply;emotion=result.emotion;online=true;canLeaveMessage=result.offerMessage;}
+  catch(error){const reason=error.name==='AbortError'?'请求超时':error.status?('接口 '+error.status+'：'+error.message):'网络或跨域连接失败';pet.dataset.aiError=reason;console.warn('Eileen AI:',reason);answer=reply(text,intent)+'（本地回复；'+reason+'。）';}
+  finally{
+    pending.textContent=answer;latest.textContent=answer;placeCompanion();messages.scrollTop=messages.scrollHeight;
+    if(online){chatHistory.push({role:'user',content:text},{role:'assistant',content:answer.slice(0,1000)});while(chatHistory.length>10)chatHistory.splice(0,2);}
+    responding=false;pet.classList.remove('thinking');
+    if(controller.motion){const action=emotion==='sad'?'idle':emotion;
+      if(motion==='thinking')controller.motion.finishThinking(action);else controller.motion.play(action);
+    }else react(emotion==='happy'?'happy':emotion==='wave'?'greet':'nod');
+    if(canLeaveMessage&&typeof offerMessage==='function'){offerMessage();placeCompanion();}say(answer);root.querySelectorAll('form button').forEach(b=>b.disabled=false);
+  }
+}
 root.querySelector('#chat').onsubmit=e=>{e.preventDefault();const input=e.currentTarget.querySelector('input');if(!responding){send(input.value);input.value='';}};root.querySelector('#quick-chat').onsubmit=root.querySelector('#chat').onsubmit;root.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>send(b.dataset.say));window.addEventListener('resize',()=>{placeCompanion();if(pet.style.left){pet.style.left=Math.max(0,Math.min(innerWidth-pet.offsetWidth,parseFloat(pet.style.left)))+'px';pet.style.top=Math.max(0,Math.min(innerHeight-pet.offsetHeight,parseFloat(pet.style.top)))+'px';}});timer=setTimeout(()=>bubble.classList.add('hidden'),6500);
+
+let messageDrafting=false,pendingMessage=null,messageSending=false,ownerToken='';
+try{ownerToken=localStorage.getItem('eileen-owner-token')||'';}catch{}
+function ownerHeaders(){return ownerToken?{Authorization:'Bearer '+ownerToken}:{};}
+function offerMessage(){
+ if(ownerToken)return;
+ latest.append(document.createTextNode(' 想留话的话，直接告诉我“我要留言”就好。'));
+}
+async function submitPendingMessage(draft){
+ messageSending=true;latest.textContent='我正在记下这句话…';
+ try{const r=await fetch(aiEndpoint.replace('/chat','/message'),{method:'POST',headers:{'Content-Type':'application/json',...ownerHeaders()},body:JSON.stringify({text:draft,confirmed:true}),signal:AbortSignal.timeout(15000)});const result=await r.json();if(!r.ok)throw Error(result.error);pendingMessage=null;latest.textContent=result.suppressed?'主人模式下未提交通知。':result.duplicate?'这句话已经记下了，不会重复加入通知。':'已记下，稍后会替你转达给 Eric。';}
+ catch(e){latest.textContent=e.message==='cooldown'?'这小时已经留过话了，稍后再来吧。':e.message==='messages_not_configured'?'留言功能尚在配置，这次没有保存。':'这次未能确认保存，请稍后再发送“确认留言”重试。';}
+ finally{messageSending=false;placeCompanion();}
+}
+function handleMessageCommand(text){
+ if(/^(?:查看|检查)?(?:待发留言|待发邮件|留言状态)$/.test(text)){
+  if(!ownerToken){latest.textContent='请先验证主人模式，再查看留言状态。';return true;}
+  latest.textContent='我查一下留言簿…';
+  fetch(aiEndpoint.replace('/chat','/inbox-status'),{method:'POST',headers:{'Content-Type':'application/json',...ownerHeaders()},body:'{}',signal:AbortSignal.timeout(10000)}).then(async r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{const entries=(data.messages||[]).map((m,i)=>{const when=new Date(m.date).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});return '【留言 '+(i+1)+'】\n提交时间：'+when+'（北京时间）\n'+m.text;});latest.textContent='待转达留言：'+data.pendingCount+' 条。\n每条代表一次独立提交。\n\n'+entries.join('\n\n────────\n\n')+'\n\n每天北京时间 20:00 尝试汇总发送。'+(data.lastAttemptDay?'最近一次发送尝试日期（UTC）：'+data.lastAttemptDay+'。':'还没有发送尝试。');placeCompanion();}).catch(()=>{latest.textContent='暂时无法查询，请确认主人模式有效且后端已部署最新版本。';placeCompanion();});return true;
+ }
+
+ if(text==='退出主人模式'){ownerToken='';try{localStorage.removeItem('eileen-owner-token');}catch{}latest.textContent='已退出主人模式。';return true;}
+ if(text==='主人模式'){
+  latest.textContent='输入你在 Cloudflare 配置的 OWNER_TOKEN，仅用于本机身份验证，不会交给 AI。';
+  const input=document.createElement('input');input.type='password';input.autocomplete='off';input.placeholder='主人验证口令';
+  const button=document.createElement('button');button.textContent='验证';button.onclick=async()=>{button.disabled=true;try{const r=await fetch(aiEndpoint.replace('/chat','/owner'),{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+input.value},body:'{}',signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error();ownerToken=input.value;try{localStorage.setItem('eileen-owner-token',ownerToken);}catch{}latest.textContent='主人模式已验证，这个浏览器不会提交留言通知。';}catch{button.disabled=false;button.textContent='验证失败，重试';}placeCompanion();};latest.append(document.createElement('br'),input,button);placeCompanion();return true;
+ }
+ if(messageSending){latest.textContent='这句话还在保存，稍等一下。';return true;}
+ if(pendingMessage&&/^(?:确认(?:留言|发送)?|好的?|可以|就这样|帮我转达)[。！!\s]*$/.test(text)){submitPendingMessage(pendingMessage);return true;}
+ if((pendingMessage||messageDrafting)&&/^(?:取消|算了|不用了|不留言了)[。！!\s]*$/.test(text)){pendingMessage=null;messageDrafting=false;latest.textContent='好，这句话不转达。';return true;}
+ if(/^(?:我想|我要|我想要|帮我|替我)?(?:给\s*eric\s*|给站长)?(?:留言|留句话|留个言)[。！!\s]*$/i.test(text)){
+  if(ownerToken){latest.textContent='主人模式下不会提交留言通知。';return true;}
+  messageDrafting=true;pendingMessage=null;latest.textContent='把希望转达的话写下来吧。想让 Eric 回复的话，也可以留下联系方式。';placeCompanion();return true;
+ }
+ const direct=/^(?:请)?(?:帮我|替我)?(?:给\s*eric\s*留言|转告\s*eric|告诉\s*eric|给站长留言|留言)[：:,，\s]*(.+)$/i.exec(text);
+ if(!messageDrafting&&!direct){pendingMessage=null;return false;}
+ messageDrafting=false;
+ if(ownerToken){latest.textContent='主人模式下不会提交留言通知。';return true;}
+ const draft=direct?direct[1].trim():text;
+ if(draft.length>1000){latest.textContent='留言请控制在一千字以内，再发给我吧。';messageDrafting=true;return true;}
+ pendingMessage=draft;
+ latest.textContent='我准备转达的是：\n'+draft+'\n\n发送“确认留言”，我就替你记下；发送“取消”就不转达。';placeCompanion();return true;
+}
+
+// Only direct requests control the page. Discussion and quoted examples go to AI.
+function isExplicitSiteCommand(text){
+ const t=text.normalize('NFKC').trim().toLowerCase().replace(/[。!！?？]+$/,'');
+ if(/[“”「」『』"\n]/.test(t)||/为什么|怎么|如何|是否|能不能|可不可以|假如|如果|比如|例如|你觉得|你认为|解释|区别|原理|喜欢|讨厌/.test(t))return false;
+ const command=t.replace(/^(?:请|麻烦你|麻烦|帮我|替我|能否帮我)[,，\s]*/,'');
+ if(/^(?:播放|放点|放个|来点|来首|打开|开启|停止|暂停|关掉|关闭|别放|不要播放|不用播放|听)(?:一下|点|些)?(?:背景)?(?:音乐|歌曲?|bgm)(?:吧|呀|一下)?$/.test(command))return true;
+ if(/^(?:切换|换|开启|打开|改成|调成|变成)(?:到|成|为)?(?:夜间|夜晚|深色|暗色|白天|日间|浅色|亮色)(?:模式|样式|主题)?(?:吧|一下)?$/.test(command)||/^(?:切换日夜|切换明暗|换个主题)$/.test(command))return true;
+ if(/^(?:打开它?|带我去吧?|去看看吧?|就这个吧?|走吧|这个不错[,， ]*去看看)$/.test(command))return true;
+ const destination=/(?:主页|首页|主站|github|代码仓库|源码仓库|game[\s-]*lab|audio[\s-]*lab|story[\s-]*lab|游戏实验室|音频实验室|故事实验室|游戏页面|音频页面|故事页面|项目|作品|文章|ocean|viewer)/i;
+ if(/^(?:回家|带我逛逛|带我随便逛逛|随便逛逛|逛逛|带路|玩游戏|看故事|读故事)(?:吧)?$/.test(command))return true;
+ return /^(?:带我去|带我看|打开|进入|跳转到|回到|返回|去|看看|看一下|想看|我想看|推荐|给我推荐)/.test(command)&&destination.test(command)&&command.length<70;
+}
 
 const projectIndex=JSON.parse(host.querySelector('[data-eileen-index]')?.textContent||'[]');
 let lastProject=null,navigationTimer;
