@@ -1,0 +1,50 @@
+<div class="nautical-background" aria-hidden="true">
+  <svg class="nautical-chart" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <defs>
+      <pattern id="nautical-grid" width="90" height="90" patternUnits="userSpaceOnUse">
+        <path d="M90 0H0V90" />
+        <path d="M42 45h6M45 42v6" />
+      </pattern>
+      <linearGradient id="nautical-fade">
+        <stop offset="0" stop-color="white" stop-opacity=".8" />
+        <stop offset=".24" stop-color="white" stop-opacity=".12" />
+        <stop offset=".76" stop-color="white" stop-opacity=".12" />
+        <stop offset="1" stop-color="white" stop-opacity=".8" />
+      </linearGradient>
+      <mask id="nautical-edge-mask"><rect width="1440" height="1000" fill="url(#nautical-fade)" /></mask>
+    </defs>
+    <g mask="url(#nautical-edge-mask)">
+      <rect class="nautical-grid" width="1440" height="1000" fill="url(#nautical-grid)" />
+      <g class="nautical-contours">
+        <path d="M-120 80C150-40 280 100 160 260S-10 500 180 610S230 880-80 1020" />
+        <path d="M-120 110C120 0 240 110 130 270S-40 510 150 630S200 900-80 1050" />
+        <path d="M-120 140C90 40 200 120 100 280S-70 520 120 650S170 920-80 1080" />
+        <path d="M-120 170C60 80 160 130 70 290S-100 530 90 670S140 940-80 1110" />
+        <path d="M1540-80C1210 80 1250 230 1380 340S1180 550 1280 730S1500 870 1390 1100" />
+        <path d="M1570-60C1240 100 1280 240 1410 360S1210 560 1310 740S1530 890 1420 1120" />
+        <path d="M1600-40C1270 120 1310 250 1440 380S1240 570 1340 750S1560 910 1450 1140" />
+      </g>
+      <g class="nautical-route">
+        <path d="M35 950Q240 730 130 540T260 140" />
+        <path d="M1360 940Q1200 780 1320 590T1210 110" />
+      </g>
+      <g class="nautical-current nautical-current-halo">
+        <path pathLength="100" d="M35 950Q240 730 130 540T260 140" />
+        <path pathLength="100" d="M1360 940Q1200 780 1320 590T1210 110" />
+        <path pathLength="100" d="M200 880Q430 740 650 860T1240 760" />
+      </g>
+      <g class="nautical-current nautical-current-core">
+        <path pathLength="100" d="M35 950Q240 730 130 540T260 140" />
+        <path pathLength="100" d="M1360 940Q1200 780 1320 590T1210 110" />
+        <path pathLength="100" d="M200 880Q430 740 650 860T1240 760" />
+      </g>
+      <g class="nautical-waypoints"><circle cx="130" cy="540" r="5" /><circle cx="1320" cy="590" r="5" /></g>
+    </g>
+    <g class="nautical-compass" transform="translate(1300 820)">
+      <circle r="66" /><circle r="53" />
+      <path d="M0-77V-58M0 58v19M-77 0h19M58 0h19M-47-47l9 9M38 38l9 9M47-47l-9 9M-38 38l-9 9" />
+      <path d="M0-44 12 0 0 44-12 0ZM-44 0 0-12 44 0 0 12Z" />
+      <text y="-88" text-anchor="middle">N</text>
+    </g>
+  </svg>
+</div>

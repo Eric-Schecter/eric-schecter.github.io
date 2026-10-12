@@ -3,6 +3,7 @@
 <html lang="{{ .Lang }}" {{ if $mode }} data-mode="{{ $mode }}"{{ end }}>
   {{ partial "head" . }}
   <body>
+    {{ partialCached "nautical-background" . }}
     {{ partialCached "nav" . }}
     <main id="pjax-container">
       {{ block "main" . }}{{ end }}

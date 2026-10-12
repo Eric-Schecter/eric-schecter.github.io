@@ -1,0 +1,131 @@
+// Decorative chart stays behind the content and outside PJAX replacements.
+html
+  --chart-paper: #f8faf7
+  --chart-ink: #487e83
+  --chart-route: #39816e
+  --chart-glow: #62b6a6
+
+@mixin nautical-night
+  --chart-paper: #0b151c
+  --chart-ink: #689397
+  --chart-route: #72ad96
+  --chart-glow: #95e3d4
+
+html[data-mode="dim"]
+  @include nautical-night
+
+@media (prefers-color-scheme: dark)
+  html:not([data-mode="lit"])
+    @include nautical-night
+
+body
+  isolation: isolate
+  background-color: var(--chart-paper)
+
+.nautical-background
+  position: fixed
+  inset: 0
+  z-index: -1
+  pointer-events: none
+  overflow: hidden
+
+.nautical-chart
+  display: block
+  width: 100%
+  height: 100%
+  color: var(--chart-ink)
+
+  pattern path
+    fill: none
+    stroke: currentColor
+    stroke-width: .6
+    opacity: .18
+
+.nautical-contours
+  fill: none
+  stroke: currentColor
+  stroke-width: 1
+  opacity: .22
+  animation: nautical-sway 12s ease-in-out infinite alternate
+
+.nautical-route
+  fill: none
+  stroke: var(--chart-route)
+  stroke-width: 1.2
+  stroke-dasharray: 5 12
+  opacity: .35
+  animation: nautical-drift 16s linear infinite
+
+// Round caps turn a near-zero dash into one moving point per route.
+.nautical-current
+  fill: none
+  stroke: var(--chart-glow)
+  stroke-linecap: round
+
+  path
+    stroke-dasharray: .01 99.99
+    animation: nautical-current-flow 10s linear infinite
+
+    &:nth-child(2)
+      animation-delay: -5s
+      animation-duration: 13s
+
+    &:nth-child(3)
+      animation-delay: -3s
+      animation-duration: 12s
+
+.nautical-current-halo
+  stroke-width: 12
+  opacity: .14
+
+.nautical-current-core
+  stroke-width: 3.5
+  opacity: .8
+
+.nautical-waypoints
+  fill: var(--chart-paper)
+  stroke: var(--chart-route)
+  stroke-width: 1.2
+  opacity: .45
+
+.nautical-compass
+  fill: none
+  stroke: currentColor
+  stroke-width: .8
+  opacity: .22
+
+  text
+    fill: currentColor
+    stroke: none
+    font-size: 13px
+    font-family: Georgia, serif
+
+@keyframes nautical-drift
+  to
+    stroke-dashoffset: -170
+
+@keyframes nautical-sway
+  from
+    transform: translate(-12px, -20px)
+  to
+    transform: translate(14px, 24px)
+
+@keyframes nautical-current-flow
+  from
+    stroke-dashoffset: 100
+  to
+    stroke-dashoffset: 0
+
+@media (max-width: 600px)
+  .nautical-chart
+    opacity: .65
+
+  .nautical-compass
+    display: none
+
+@media (prefers-reduced-motion: reduce)
+  .nautical-route, .nautical-contours, .nautical-current path
+    animation: none
+
+  .nautical-current
+    display: none
