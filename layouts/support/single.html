@@ -1,0 +1,19 @@
+{{ define "main" }}
+<section class="wrap support-page" aria-labelledby="support-title">
+  <h1 id="support-title">A Coin for the Voyage</h1>
+    <div class="support-content">
+      <div class="support-options">
+        <figure>
+          <a href="{{ "images/support/wechat.jpg" | relURL }}" target="_blank" rel="noopener" aria-label="打开微信收款码原图（新标签页）">
+            <img src="{{ "images/support/wechat.jpg" | relURL }}" alt="微信支付收款二维码" width="828" height="1124" loading="lazy" />
+          </a>
+        </figure>
+        <figure>
+          <a href="{{ "images/support/alipay.jpg" | relURL }}" target="_blank" rel="noopener" aria-label="打开支付宝收款码原图（新标签页）">
+            <img src="{{ "images/support/alipay.jpg" | relURL }}" alt="支付宝收款二维码" width="1280" height="1919" loading="lazy" />
+          </a>
+        </figure>
+      </div>
+    </div>
+</section>
+{{ end }}

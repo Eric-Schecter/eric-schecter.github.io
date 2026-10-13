@@ -4,12 +4,14 @@ html
   --chart-ink: #487e83
   --chart-route: #39816e
   --chart-glow: #62b6a6
+  --card-surface: #fff
 
 @mixin nautical-night
-  --chart-paper: #0b151c
+  --chart-paper: #20212b
   --chart-ink: #689397
   --chart-route: #72ad96
   --chart-glow: #95e3d4
+  --card-surface: #2c303b
 
 html[data-mode="dim"]
   @include nautical-night
@@ -21,6 +23,16 @@ html[data-mode="dim"]
 body
   isolation: isolate
   background-color: var(--chart-paper)
+
+// Keep card text readable when the theme's hover rule resets link color.
+.article:hover a
+  color: var(--text) !important
+
+.article
+  background-color: var(--card-surface)
+
+.article_meta
+  background-color: var(--card-surface)
 
 .nautical-background
   position: fixed
@@ -129,3 +141,43 @@ body
 
   .nautical-current
     display: none
+
+.support-page
+  padding-top: 7rem
+  padding-bottom: 3rem
+
+  h1
+    text-align: center
+    margin-bottom: 2rem
+
+.support-content
+  padding: 0 0 2rem
+
+.support-options
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 2rem
+  max-width: 620px
+  margin: 0 auto
+
+  figure
+    margin: 0
+    text-align: center
+
+  figure > a
+    display: block
+
+  img
+    display: block
+    width: auto
+    max-width: 100%
+    height: clamp(240px, 50vw, 380px)
+    object-fit: contain
+    margin: 0 auto
+    background: #fff
+    border-radius: 8px
+
+@media (max-width: 520px)
+  .support-options
+    grid-template-columns: 1fr
+    max-width: 290px
