@@ -1,4 +1,6 @@
 +++
+url = "/posts/viewer/"
+description = "A WebGPU-based PBR viewer."
 date = '2026-01-09T22:47:45+08:00'
 title = 'Viewer'
 image = "/images/viewer.png"

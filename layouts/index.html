@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- $config := site.Params }}
 {{- $blog_dir := default "posts" $config.blogDir }}
-{{- $pages := where site.RegularPages "Type" "in" $config.mainSections }}
+{{- $pages := where site.RegularPages "Section" "eq" "posts" }}
 <div class="wrap pt-2 mt-2">
   {{- $paginator := .Paginate $pages -}}
   {{- $size := $paginator.PagerSize }}

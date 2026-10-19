@@ -1,0 +1,28 @@
+{{ define "main" }}
+<section class="wrap workshop-page" aria-label="Geometry and graphics demos">
+  <header class="workshop-heading">
+    <p>{{ .Description }}</p>
+  </header>
+  {{ $paginator := .Paginate .RegularPages.ByDate.Reverse 8 }}
+  <div class="workshop-grid">
+    {{ range $paginator.Pages }}
+    <article class="article">
+      <a href="{{ .RelPermalink }}">
+        <div class="article_thumb" style="background-image: url('{{ partial "func/getImage" . }}')"></div>
+        <div class="article_meta">
+          <h2>{{ .Title }}</h2>
+          <p>{{ .Description }}</p>
+        </div>
+      </a>
+    </article>
+    {{ end }}
+  </div>
+  {{ if gt $paginator.TotalPages 1 }}
+  <nav class="blog-pagination" aria-label="Workshop pages">
+    {{ with $paginator.Prev }}<a href="{{ .URL }}">← Previous</a>{{ end }}
+    <span>{{ $paginator.PageNumber }} / {{ $paginator.TotalPages }}</span>
+    {{ with $paginator.Next }}<a href="{{ .URL }}">Next →</a>{{ end }}
+  </nav>
+  {{ end }}
+</section>
+{{ end }}

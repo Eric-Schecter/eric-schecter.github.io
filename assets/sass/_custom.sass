@@ -181,3 +181,165 @@ body
   .support-options
     grid-template-columns: 1fr
     max-width: 290px
+
+.blog-page
+  width: 100%
+  max-width: 780px
+  padding-top: 8rem
+  padding-bottom: 4rem
+
+.blog-heading
+  margin-bottom: 3rem
+
+  h1
+    margin: 1rem 0
+    line-height: 1.35
+    overflow-wrap: anywhere
+
+  > p:last-child, time
+    opacity: .7
+
+.blog-eyebrow
+  color: var(--chart-route)
+  letter-spacing: .12em
+  font-size: .85rem
+
+.blog-entry
+  & + .blog-entry
+    border-top: 1px solid color-mix(in srgb, var(--text) 18%, transparent)
+
+  time
+    font-size: .85rem
+    opacity: .65
+
+  h2
+    margin: .65rem 0
+    line-height: 1.4
+
+  p
+    margin-bottom: 1rem
+    opacity: .8
+
+.blog-entry-link
+  display: block
+  padding: 2rem 1.2rem
+  border-radius: .5rem
+  color: var(--text)
+  transition: background-color .2s ease
+
+  h2
+    transition: color .2s ease
+
+  p
+    margin-bottom: 0
+
+  &:hover, &:focus-visible
+    background-color: var(--card-surface)
+
+    h2
+      color: var(--chart-route)
+
+.blog-prose a
+  color: var(--chart-route)
+  text-decoration: underline
+  text-underline-offset: 4px
+
+.blog-prose
+  line-height: 1.9
+  overflow-wrap: anywhere
+
+  p, ul, ol, pre, blockquote
+    margin: 0 0 1.5rem
+
+  h2, h3, h4
+    margin: 2.5rem 0 1rem
+    line-height: 1.5
+
+  ul, ol
+    padding-left: 1.5rem
+
+  blockquote
+    padding: 1rem 1.4rem
+    border-left: 2px solid var(--chart-route)
+    background: var(--card-surface)
+
+    &::before, &::after
+      content: none
+
+    p:last-child
+      margin-bottom: 0
+
+  pre
+    max-width: 100%
+    overflow-x: auto
+    padding: 1rem
+
+  img
+    max-width: 100%
+    height: auto
+    border-radius: .5rem
+
+.blog-pagination
+  display: flex
+  justify-content: center
+  gap: 1.5rem
+  margin-top: 2rem
+
+@media (max-width: 700px)
+  .nav-menu
+    flex-wrap: wrap
+    padding-right: 0
+
+  .nav-actions
+    flex-wrap: wrap
+    justify-content: flex-end
+    max-width: 100%
+    gap: 12px !important
+
+  .blog-page
+    padding-top: 11rem
+
+.workshop-page
+  width: 100%
+  padding-top: 8rem
+  padding-bottom: 4rem
+
+.workshop-heading
+  margin-bottom: 2rem
+
+  h1
+    margin-bottom: .8rem
+
+  p
+    opacity: .7
+
+.workshop-grid
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 2rem
+
+  .article_thumb
+    height: 15rem
+
+  .article_meta
+    padding: 1.25rem
+
+  h2
+    font-size: 1.3rem
+    margin-bottom: .6rem
+
+  p
+    opacity: .75
+    line-height: 1.6
+
+// Reacts to PJAX content changes as well as full page loads.
+body:has(.workshop-page, .workshop-detail) .nautical-background
+  opacity: .12
+
+@media (max-width: 700px)
+  .workshop-page
+    padding-top: 11rem
+
+@media (max-width: 600px)
+  .workshop-grid
+    grid-template-columns: 1fr
