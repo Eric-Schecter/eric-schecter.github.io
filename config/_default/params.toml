@@ -12,3 +12,5 @@ faviconsDir = "images/icons/" # with a trailing slash
 blogDir = "posts" # edit
 
 showBlog = false # Set to true to show the Blog navigation icon.
+
+showStoryLab = false # Set to true to restore the Story Lab navigation icon.
