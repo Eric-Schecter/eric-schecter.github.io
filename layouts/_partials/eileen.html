@@ -4,5 +4,5 @@
 {{ $items = $items | append (dict "title" .Title "url" .RelPermalink "date" (.Date.Format "2006-01-02T15:04:05Z07:00") "summary" (.Summary | plainify | htmlUnescape | truncate 160) "tags" (.Params.tags | default slice) "featured" (.Params.featured | default false)) }}
 {{ end }}
 <eileen-companion><script type="application/json" data-eileen-index>{{ $items | jsonify | safeJS }}</script></eileen-companion>
-<script type="module" src="{{ "eileen/widget.js" | relURL }}?v=messages-10"></script>
+<script type="module" src="{{ "eileen/widget.js" | relURL }}?v=no-hover-11"></script>
 {{ end }}

@@ -318,11 +318,30 @@ body
   grid-template-columns: repeat(2, minmax(0, 1fr))
   gap: 2rem
 
+  .article
+    position: relative
+
+    > a
+      display: block
+      height: 100%
+
   .article_thumb
     height: 15rem
 
   .article_meta
     padding: 1.25rem
+    // Transform moves the content visually without changing the grid's row height.
+    transition: transform .4s ease
+
+  .article:hover .article_meta:not(.center_y), .article:focus-within .article_meta:not(.center_y)
+    margin-top: 0
+    transform: translateY(-12px)
+
+  .article:focus-within .article_thumb::after
+    opacity: .5
+
+  .article:hover p, .article:focus-within p
+    opacity: 1
 
   h2
     font-size: 1.3rem
@@ -331,6 +350,14 @@ body
   p
     opacity: .75
     line-height: 1.6
+    transition: opacity .4s ease
+
+@media (prefers-reduced-motion: reduce)
+  .workshop-grid .article_meta
+    transition: none
+
+  .workshop-grid .article:hover .article_meta:not(.center_y), .workshop-grid .article:focus-within .article_meta:not(.center_y)
+    transform: none
 
 // Reacts to PJAX content changes as well as full page loads.
 body:has(.workshop-page, .workshop-detail) .nautical-background
