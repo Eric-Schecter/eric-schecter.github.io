@@ -1,0 +1,15 @@
+{{ define "main" }}
+<section class="games-page" aria-label="Games">
+  <div class="games-grid">
+    {{ range site.Data.games.games }}
+    <a class="game-card" href="{{ .url }}" aria-label="Play {{ .name }}">
+      <div class="game-cover">
+        <img src="{{ .image | relURL }}" alt="{{ .name }} cover art" width="1672" height="941" decoding="async" />
+        <span class="game-play" aria-hidden="true">Play ↗</span>
+      </div>
+      <h2>{{ .name }}</h2>
+    </a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

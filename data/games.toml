@@ -1,0 +1,19 @@
+[[games]]
+name = "Strawboat"
+image = "images/games/strawboat.png"
+url = "https://eric-schecter.github.io/straw-boat/"
+
+[[games]]
+name = "Sailshot"
+image = "images/games/sailshot.png"
+url = "https://eric-schecter.github.io/sail-shot/"
+
+[[games]]
+name = "Little Harbor"
+image = "images/games/little-harbor.png"
+url = "https://eric-schecter.github.io/little-harbor/"
+
+[[games]]
+name = "Mistbound"
+image = "images/games/mistbound.png"
+url = "https://eric-schecter.github.io/mistbound/"
