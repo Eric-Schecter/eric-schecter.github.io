@@ -17,3 +17,8 @@ url = "https://eric-schecter.github.io/little-harbor/"
 name = "Mistbound"
 image = "images/games/mistbound.png"
 url = "https://eric-schecter.github.io/mistbound/"
+
+[[games]]
+name = "Bubble Regatta"
+image = "images/games/bubble-regatta.png"
+url = "https://eric-schecter.github.io/bubble-regatta/"

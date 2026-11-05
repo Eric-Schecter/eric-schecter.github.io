@@ -2,7 +2,7 @@
 (function () {
   const resources = [
     // audios
-    '/assets/audios/bgm.mp3',
+    '/assets/audios/bgm.mp3?v=20261105',
     // images
     'images/genshin-start.png',
     'images/ocean-2.png',

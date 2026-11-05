@@ -12,12 +12,74 @@
 
 <script>
 (()=>{
- const btn=document.getElementById('bgmPlayBtn');let ctx,buffer,source,loading=null,version=0,offset=0,started=0;
- const ui=()=>{document.getElementById('playState').style.display=source?'inline':'none';document.getElementById('stopState').style.display=source?'none':'inline';};
- const stop=()=>{version++;if(source){offset=(offset+ctx.currentTime-started)%128.36;source.onended=null;source.stop();source=null;}ui();};
- const play=async()=>{if(source)return;const request=++version;ctx??=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();if(!buffer){loading??=fetch('/assets/audios/bgm.mp3').then(r=>{if(!r.ok)throw Error('Audio unavailable');return r.arrayBuffer();}).then(b=>ctx.decodeAudioData(b)).finally(()=>loading=null);buffer=await loading;}if(request!==version)return;if(source)return;const current=ctx.createBufferSource();current.buffer=buffer;current.loop=true;current.loopStart=63.567;current.loopEnd=128.36;current.connect(ctx.destination);current.start(0,offset);source=current;started=ctx.currentTime;current.onended=()=>{if(source===current){source=null;ui();}};ui();};
- window.eileenMusic={play,stop,get playing(){return !!source;}};
- btn.addEventListener('click',()=>{if(source)stop();else play().catch(e=>{ui();console.error('Music playback failed',e);});});ui();
+ const btn = document.getElementById('bgmPlayBtn');
+ const preferenceKey = 'site-music-enabled';
+ let ctx, buffer, source, gain, loading = null, version = 0, offset = 0, started = 0;
+ let enabled = true;
+ try { enabled = localStorage.getItem(preferenceKey) !== 'false'; } catch (_) {}
+ const remember = value => {
+   enabled = value;
+   try { localStorage.setItem(preferenceKey, String(value)); } catch (_) {}
+ };
+ const ui = () => {
+   document.getElementById('playState').style.display = source ? 'inline' : 'none';
+   document.getElementById('stopState').style.display = source ? 'none' : 'inline';
+   btn.setAttribute('aria-label', source ? 'Pause music' : 'Play music');
+ };
+ const stop = () => {
+   remember(false);
+   version++;
+   if (source) {
+     offset = (offset + ctx.currentTime - started) % buffer.duration;
+     source.onended = null;
+     source.stop();
+     source.disconnect();
+     gain.disconnect();
+     source = null;
+   }
+   ui();
+ };
+ const start = async () => {
+   if (source || !enabled) return;
+   const request = ++version;
+   ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+   await ctx.resume();
+   if (request !== version || !enabled || ctx.state !== 'running') return;
+   if (!buffer) {
+     loading ??= fetch('/assets/audios/bgm.mp3?v=20261105')
+       .then(r => { if (!r.ok) throw Error('Audio unavailable'); return r.arrayBuffer(); })
+       .then(b => ctx.decodeAudioData(b)).finally(() => loading = null);
+     buffer = await loading;
+   }
+   if (request !== version || !enabled || source) return;
+   const current = ctx.createBufferSource();
+   current.buffer = buffer;
+   current.loop = true;
+   current.loopStart = 0;
+   current.loopEnd = buffer.duration;
+   gain = ctx.createGain();
+   gain.gain.setValueAtTime(0, ctx.currentTime);
+   gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+   current.connect(gain);
+   gain.connect(ctx.destination);
+   current.start(0, offset);
+   source = current;
+   started = ctx.currentTime;
+   current.onended = () => { if (source === current) { source = null; ui(); } };
+   ui();
+ };
+ const play = () => { remember(true); return start(); };
+ const tryAutoplay = () => { if (enabled && !source) start().catch(() => ui()); };
+ window.eileenMusic = { play, stop, get playing() { return !!source; } };
+ btn.addEventListener('click', event => {
+   event.stopPropagation();
+   if (source) stop();
+   else play().catch(e => { ui(); console.error('Music playback failed', e); });
+ });
+ // Retry from a real click when the browser blocks playback on page load.
+ document.addEventListener('click', tryAutoplay);
+ ui();
+ tryAutoplay();
 })();
 
 </script>
