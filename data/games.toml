@@ -22,3 +22,8 @@ url = "https://eric-schecter.github.io/mistbound/"
 name = "Bubble Regatta"
 image = "images/games/bubble-regatta.png"
 url = "https://eric-schecter.github.io/bubble-regatta/"
+
+[[games]]
+name = "Swell & Stow"
+image = "images/games/swell-stow.png"
+url = "https://eric-schecter.github.io/swell-stow/"
