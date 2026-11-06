@@ -39,18 +39,26 @@
    }
    ui();
  };
+ // Download and decode independently of autoplay permission.
+ const prepare = () => {
+   if (buffer) return Promise.resolve(buffer);
+   if (loading) return loading;
+   ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+   loading = fetch('/assets/audios/bgm.mp3?v=20261105')
+     .then(r => { if (!r.ok) throw Error('Audio unavailable'); return r.arrayBuffer(); })
+     .then(b => ctx.decodeAudioData(b))
+     .then(decoded => { buffer = decoded; return decoded; })
+     .finally(() => { loading = null; btn.removeAttribute('aria-busy'); });
+   btn.setAttribute('aria-busy', 'true');
+   return loading;
+ };
  const start = async () => {
    if (source || !enabled) return;
    const request = ++version;
-   ctx ??= new (window.AudioContext || window.webkitAudioContext)();
-   await ctx.resume();
+   const ready = prepare();
+   // Resume directly in the click handler, while decoding can run in parallel.
+   await Promise.all([ctx.resume(), ready]);
    if (request !== version || !enabled || ctx.state !== 'running') return;
-   if (!buffer) {
-     loading ??= fetch('/assets/audios/bgm.mp3?v=20261105')
-       .then(r => { if (!r.ok) throw Error('Audio unavailable'); return r.arrayBuffer(); })
-       .then(b => ctx.decodeAudioData(b)).finally(() => loading = null);
-     buffer = await loading;
-   }
    if (request !== version || !enabled || source) return;
    const current = ctx.createBufferSource();
    current.buffer = buffer;
@@ -59,7 +67,7 @@
    current.loopEnd = buffer.duration;
    gain = ctx.createGain();
    gain.gain.setValueAtTime(0, ctx.currentTime);
-   gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+   gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.4);
    current.connect(gain);
    gain.connect(ctx.destination);
    current.start(0, offset);
@@ -79,6 +87,7 @@
  // Retry from a real click when the browser blocks playback on page load.
  document.addEventListener('click', tryAutoplay);
  ui();
+ try { prepare().catch(() => ui()); } catch (_) { ui(); }
  tryAutoplay();
 })();
 

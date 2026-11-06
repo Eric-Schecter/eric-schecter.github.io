@@ -27,3 +27,8 @@ url = "https://eric-schecter.github.io/bubble-regatta/"
 name = "Swell & Stow"
 image = "images/games/swell-stow.png"
 url = "https://eric-schecter.github.io/swell-stow/"
+
+[[games]]
+name = "Corsair Tides"
+image = "images/games/corsair-tides.png"
+url = "https://eric-schecter.github.io/corsair-tides/"

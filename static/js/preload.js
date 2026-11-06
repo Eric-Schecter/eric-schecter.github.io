@@ -1,8 +1,6 @@
 // 超短版：10 行核心逻辑
 (function () {
   const resources = [
-    // audios
-    '/assets/audios/bgm.mp3?v=20261105',
     // images
     'images/genshin-start.png',
     'images/ocean-2.png',
