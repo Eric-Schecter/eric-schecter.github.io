@@ -32,3 +32,8 @@ url = "https://eric-schecter.github.io/swell-stow/"
 name = "Corsair Tides"
 image = "images/games/corsair-tides.png"
 url = "https://eric-schecter.github.io/corsair-tides/"
+
+[[games]]
+name = "Bullet Storm"
+image = "images/games/bullet-storm.png"
+url = "https://eric-schecter.github.io/bullet-storm/"
