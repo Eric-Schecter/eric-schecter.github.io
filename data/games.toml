@@ -37,3 +37,8 @@ url = "https://eric-schecter.github.io/corsair-tides/"
 name = "Bullet Storm"
 image = "images/games/bullet-storm.png"
 url = "https://eric-schecter.github.io/bullet-storm/"
+
+[[games]]
+name = "Kingdoms · The Last Stand"
+image = "images/games/kingdoms.webp"
+url = "https://eric-schecter.github.io/kingdoms/"
