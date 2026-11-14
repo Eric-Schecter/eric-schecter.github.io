@@ -42,3 +42,8 @@ url = "https://eric-schecter.github.io/bullet-storm/"
 name = "Kingdoms · The Last Stand"
 image = "images/games/kingdoms.webp"
 url = "https://eric-schecter.github.io/kingdoms/"
+
+[[games]]
+name = "Little Knights"
+image = "images/games/little-knights.png"
+url = "https://eric-schecter.github.io/little-knights/"
