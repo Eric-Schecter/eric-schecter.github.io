@@ -47,3 +47,8 @@ url = "https://eric-schecter.github.io/kingdoms/"
 name = "Little Knights"
 image = "images/games/little-knights.png"
 url = "https://eric-schecter.github.io/little-knights/"
+
+[[games]]
+name = "Valley Chronicle"
+image = "images/games/valley-chronicle.png"
+url = "https://eric-schecter.github.io/valley-chronicle/"
