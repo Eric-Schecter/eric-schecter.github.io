@@ -52,3 +52,8 @@ url = "https://eric-schecter.github.io/little-knights/"
 name = "Valley Chronicle"
 image = "images/games/valley-chronicle.png"
 url = "https://eric-schecter.github.io/valley-chronicle/"
+
+[[games]]
+name = "Song Beyond the Mist"
+image = "images/games/song-beyond-the-mist.png"
+url = "https://eric-schecter.github.io/song-beyond-the-mist/"
